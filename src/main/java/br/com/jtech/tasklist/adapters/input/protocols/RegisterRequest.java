@@ -1,0 +1,46 @@
+/*
+*  @(#)RegisterRequest.java
+*
+*  Copyright (c) J-Tech Solucoes em Informatica.
+*  All Rights Reserved.
+*
+*  This software is the confidential and proprietary information of J-Tech.
+*  ("Confidential Information"). You shall not disclose such Confidential
+*  Information and shall use it only in accordance with the terms of the
+*  license agreement you entered into with J-Tech.
+*
+*/
+package br.com.jtech.tasklist.adapters.input.protocols;
+
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+/**
+* class RegisterRequest 
+* 
+* @author jtech
+*/
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class RegisterRequest {
+
+    @NotBlank(message = "Nome é obrigatório")
+    @Size(min = 3, max = 100, message = "Nome deve ter entre 3 e 100 caracteres")
+    private String name;
+
+    @NotBlank(message = "Email é obrigatório")
+    @Email(message = "Email deve ser válido")
+    private String email;
+
+    @NotBlank(message = "Senha é obrigatória")
+    @Size(min = 6, message = "Senha deve ter no mínimo 6 caracteres")
+    private String password;
+}
+
