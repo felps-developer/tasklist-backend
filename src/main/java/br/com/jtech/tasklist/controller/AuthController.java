@@ -15,11 +15,13 @@ package br.com.jtech.tasklist.controller;
 import br.com.jtech.tasklist.dto.AuthRequest;
 import br.com.jtech.tasklist.dto.AuthResponse;
 import br.com.jtech.tasklist.dto.RegisterRequest;
+import br.com.jtech.tasklist.dto.UserResponse;
 import br.com.jtech.tasklist.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -44,6 +46,16 @@ public class AuthController {
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody AuthRequest request) {
         AuthResponse response = authService.login(request.getEmail(), request.getPassword());
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping(value = "/me", produces = "application/json")
+    public ResponseEntity<UserResponse> getCurrentUser(Authentication authentication) {
+        if (authentication == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        String userEmail = authentication.getName();
+        UserResponse user = authService.getCurrentUser(userEmail);
+        return ResponseEntity.ok(user);
     }
 }
 

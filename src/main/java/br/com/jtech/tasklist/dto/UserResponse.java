@@ -1,5 +1,5 @@
 /*
-*  @(#)AuthResponse.java
+*  @(#)UserResponse.java
 *
 *  Copyright (c) J-Tech Solucoes em Informatica.
 *  All Rights Reserved.
@@ -17,8 +17,10 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.UUID;
+
 /**
-* class AuthResponse 
+* class UserResponse 
 * 
 * @author jtech
 */
@@ -26,12 +28,10 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class AuthResponse {
+public class UserResponse {
 
-    private String accessToken;
-    private String refreshToken;
-    @Builder.Default
-    private String tokenType = "Bearer";
-    private UserResponse user;
+    private UUID id;
+    private String name;
+    private String email;
 }
 

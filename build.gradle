@@ -79,6 +79,7 @@ tasks.named('compileJava') {
 
 tasks.named('bootRun') {
 	jvmArgs = ['-Xmx512m', '-XX:+UseG1GC']
+	standardInput = System.in
 }
 
 // Desabilitar tarefas desnecessárias em desenvolvimento

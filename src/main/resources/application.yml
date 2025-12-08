@@ -41,7 +41,7 @@ management:
       exposure:
         include: "*"
 server:
-  port: ${PORT:0}
+  port: ${PORT:8080}
   forward-headers-strategy: framework
 logging:
   level:

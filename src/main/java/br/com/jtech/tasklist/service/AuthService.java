@@ -13,6 +13,7 @@
 package br.com.jtech.tasklist.service;
 
 import br.com.jtech.tasklist.dto.AuthResponse;
+import br.com.jtech.tasklist.dto.UserResponse;
 import br.com.jtech.tasklist.entity.UserEntity;
 import br.com.jtech.tasklist.repository.UserRepository;
 import br.com.jtech.tasklist.config.infra.security.JwtTokenProvider;
@@ -60,16 +61,32 @@ public class AuthService {
         String accessToken = jwtTokenProvider.generateToken(user.getEmail());
         String refreshToken = jwtTokenProvider.generateRefreshToken(user.getEmail());
 
+        UserResponse userResponse = UserResponse.builder()
+                .id(user.getId())
+                .name(user.getName())
+                .email(user.getEmail())
+                .build();
+
         return AuthResponse.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .tokenType("Bearer")
+                .user(userResponse)
                 .build();
     }
 
     public UserEntity findByEmail(String email) {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado"));
+    }
+
+    public UserResponse getCurrentUser(String email) {
+        UserEntity user = findByEmail(email);
+        return UserResponse.builder()
+                .id(user.getId())
+                .name(user.getName())
+                .email(user.getEmail())
+                .build();
     }
 }
 
