@@ -12,8 +12,8 @@
 */
 package br.com.jtech.tasklist.config.infra.security;
 
-import br.com.jtech.tasklist.adapters.output.repositories.UserRepository;
-import br.com.jtech.tasklist.adapters.output.repositories.entities.UserEntity;
+import br.com.jtech.tasklist.repository.UserRepository;
+import br.com.jtech.tasklist.entity.UserEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
