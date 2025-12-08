@@ -37,6 +37,7 @@ Database
 #### Princípios SOLID Aplicados
 
 1. **Single Responsibility**: Cada classe tem uma única responsabilidade
+
    - `AuthService`: Apenas lógica de autenticação
    - `TaskService`: Apenas lógica de gerenciamento de tarefas
    - `JwtTokenProvider`: Apenas geração/validação de tokens JWT
@@ -44,14 +45,17 @@ Database
    - `TaskController`: Apenas recebe requisições HTTP de tarefas
 
 2. **Open/Closed**: Classes abertas para extensão, fechadas para modificação
+
    - Services podem ser estendidos sem modificar código existente
    - Novos métodos podem ser adicionados sem quebrar funcionalidades existentes
 
 3. **Liskov Substitution**: Implementações respeitam contratos
+
    - Repositories podem ser substituídos por implementações alternativas
    - Services mantêm contratos consistentes
 
 4. **Interface Segregation**: Interfaces específicas e coesas
+
    - Repositories têm métodos específicos para cada entidade
    - Services têm responsabilidades bem definidas
 
@@ -78,6 +82,7 @@ Database
 - **Spring Data JPA**: Abstração sobre JPA/Hibernate
 - **Hibernate**: ORM para mapeamento objeto-relacional
 - **PostgreSQL**: Banco de dados relacional (produção)
+- **Flyway**: Controle de versão de banco de dados (migrations)
 - **H2**: Banco em memória (testes)
 
 ### Segurança
@@ -114,40 +119,93 @@ Database
 4. **Spring Security**: Framework robusto e amplamente testado para autenticação/autorização, integração nativa com Spring Boot
 5. **Spring Data JPA**: Reduz drasticamente o código boilerplate, facilita manutenção de queries, suporte a transações declarativas
 6. **PostgreSQL**: Robusto, open-source, ACID compliance, suporte a relacionamentos complexos, extensível
-7. **JWT**: Stateless, escalável, adequado para APIs REST, facilita horizontal scaling
-8. **BCrypt**: Algoritmo de hash seguro, padrão da indústria, proteção contra rainbow tables
-9. **JUnit 5 + Mockito**: Padrão da indústria para testes em Java, excelente suporte a testes unitários e de integração
-10. **Gradle**: Build tool moderno, mais rápido que Maven, excelente suporte a multi-projetos
-11. **Lombok**: Reduz boilerplate significativamente, melhora legibilidade do código
-12. **SpringDoc OpenAPI**: Documentação automática da API, facilita integração e testes
+7. **Hibernate**: ORM maduro e poderoso, suporte a relacionamentos complexos, cache de segundo nível
+8. **Flyway**: Controle de versão de banco de dados, migrations versionadas, histórico de mudanças
+9. **JWT**: Stateless, escalável, adequado para APIs REST, facilita horizontal scaling
+10. **BCrypt**: Algoritmo de hash seguro, padrão da indústria, proteção contra rainbow tables
+11. **JUnit 5 + Mockito**: Padrão da indústria para testes em Java, excelente suporte a testes unitários e de integração
+12. **Gradle**: Build tool moderno, mais rápido que Maven, excelente suporte a multi-projetos
+13. **Lombok**: Reduz boilerplate significativamente, melhora legibilidade do código
+14. **SpringDoc OpenAPI**: Documentação automática da API, facilita integração e testes
 
 ## Como Rodar Localmente
 
 ### Pré-requisitos
 
 - Java 21 ou superior
-- PostgreSQL 12+ (ou Docker)
+- Docker e Docker Compose (recomendado) ou PostgreSQL 16+ instalado localmente
 - Gradle 7+ (ou usar o wrapper incluído)
 
 ### Configuração do Banco de Dados
 
-1. Crie um banco de dados PostgreSQL:
+#### Opção 1: Usando Docker Compose (Recomendado)
+
+1. Inicie o PostgreSQL usando Docker Compose:
+
+```bash
+docker-compose up -d
+```
+
+Isso irá:
+
+- Criar um container PostgreSQL 16
+- Criar o banco de dados `tasklist_db`
+- Configurar usuário `postgres` com senha `postgres`
+- Expor a porta `5432`
+
+2. Verifique se o container está rodando:
+
+```bash
+docker-compose ps
+```
+
+3. O banco de dados estará pronto para uso. As migrations do Flyway serão executadas automaticamente na primeira execução da aplicação.
+
+#### Opção 2: PostgreSQL Local
+
+1. Instale o PostgreSQL 16+ em sua máquina
+
+2. Crie o banco de dados:
 
 ```sql
 CREATE DATABASE tasklist_db;
+CREATE USER postgres WITH PASSWORD 'postgres';
+GRANT ALL PRIVILEGES ON DATABASE tasklist_db TO postgres;
 ```
 
-2. Configure as variáveis de ambiente ou edite `application.yml`:
+3. Configure as variáveis de ambiente ou edite `application.yml`:
 
 ```yaml
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/tasklist_db
-    username: seu_usuario
-    password: sua_senha
+    username: postgres
+    password: postgres
 ```
 
+### Migrations do Flyway
+
+O projeto utiliza **Flyway** para controle de versão do banco de dados. As migrations estão localizadas em `src/main/resources/db/migration/`:
+
+- `V1__Create_users_table.sql`: Cria a tabela de usuários
+- `V2__Create_tasks_table.sql`: Cria a tabela de tarefas com relacionamento
+
+**As migrations são executadas automaticamente** quando a aplicação inicia. O Flyway:
+
+- Valida o estado atual do banco
+- Executa apenas migrations pendentes
+- Mantém histórico de todas as migrations aplicadas
+- Garante que o banco está na versão correta
+
+**Para criar uma nova migration:**
+
+1. Crie um arquivo SQL em `src/main/resources/db/migration/`
+2. Nomeie seguindo o padrão: `V{numero}__{descricao}.sql`
+3. Exemplo: `V3__Add_task_priority.sql`
+
 ### Executando a Aplicação
+
+**⚠️ Certifique-se de que o PostgreSQL está rodando antes de executar a aplicação!**
 
 #### Opção 1: Via Gradle Wrapper
 
@@ -191,6 +249,19 @@ export JWT_REFRESH_EXPIRATION=604800000  # 7 dias em ms
 
 # Profile
 export PROFILE=dev
+
+# JPA
+export JPA_SHOW_SQL=false  # Desabilita logs SQL em produção
+```
+
+### Parar o Banco de Dados (Docker)
+
+```bash
+# Parar o container
+docker-compose down
+
+# Parar e remover volumes (apaga dados)
+docker-compose down -v
 ```
 
 ### Acessando a Documentação
@@ -293,26 +364,31 @@ src/
 ### Descrição das Camadas
 
 #### 1. **Controller (Presentation Layer)**
+
 - **Responsabilidade**: Receber requisições HTTP, validar entrada, chamar Services
 - **Componentes**: `AuthController`, `TaskController`
 - **DTOs**: Objetos de transferência de dados (Request/Response)
 
 #### 2. **Service (Business Layer)**
+
 - **Responsabilidade**: Lógica de negócio, orquestração de operações
 - **Componentes**: `AuthService`, `TaskService`
 - **Características**: Transacional, valida regras de negócio
 
 #### 3. **Repository (Data Access Layer)**
+
 - **Responsabilidade**: Acesso a dados, abstração do banco de dados
 - **Componentes**: `UserRepository`, `TaskRepository`
 - **Tecnologia**: Spring Data JPA
 
 #### 4. **Entity (Domain/Data Layer)**
+
 - **Responsabilidade**: Representação das entidades do banco de dados
 - **Componentes**: `UserEntity`, `TaskEntity`
 - **Tecnologia**: JPA/Hibernate
 
 #### 5. **Config (Infrastructure)**
+
 - **Security**: Configurações de autenticação/autorização
 - **Handlers**: Tratamento centralizado de exceções
 - **Swagger**: Documentação da API
@@ -363,7 +439,18 @@ src/
 - **Type-safe queries**: Métodos de query gerados automaticamente
 - **Transações**: Gerenciamento automático de transações
 
-### 5. Uso Direto de Entities
+### 5. Flyway para Migrations
+
+**Justificativa**:
+
+- **Versionamento**: Controle de versão do banco de dados
+- **Histórico**: Rastreabilidade de todas as mudanças no schema
+- **Colaboração**: Migrations versionadas facilitam trabalho em equipe
+- **Produção**: Migrations aplicadas automaticamente em deploy
+- **Rollback**: Possibilidade de criar migrations de rollback quando necessário
+- **Validação**: Flyway valida o estado do banco antes de executar migrations
+
+### 6. Uso Direto de Entities
 
 **Justificativa**:
 
@@ -372,7 +459,7 @@ src/
 - **Spring Data JPA**: Framework já abstrai bem a persistência
 - **Adequação**: Para este projeto, a complexidade de separar Domain/Entity não se justifica
 
-### 6. Exception Handling Centralizado
+### 7. Exception Handling Centralizado
 
 **Justificativa**:
 
@@ -381,7 +468,7 @@ src/
 - **Logging**: Facilita logging centralizado
 - **UX**: Mensagens de erro claras para o cliente
 
-### 7. Validação de Propriedade em Tasks
+### 8. Validação de Propriedade em Tasks
 
 **Justificativa**:
 
@@ -390,7 +477,7 @@ src/
 - **Query**: Uso de `findByIdAndUser_Id` para garantir propriedade
 - **Prevenção de Ataques**: Protege contra acesso não autorizado a recursos de outros usuários
 
-### 8. Inversão de Dependência via Spring Data JPA
+### 9. Inversão de Dependência via Spring Data JPA
 
 **Justificativa**:
 
@@ -399,7 +486,7 @@ src/
 - **Simplicidade**: Não precisa de camada adicional de Ports/Adapters
 - **SOLID**: Respeita o princípio de Dependency Inversion através das interfaces Repository
 
-### 9. Separação entre Request/Response DTOs e Entities
+### 10. Separação entre Request/Response DTOs e Entities
 
 **Justificativa**:
 
@@ -409,7 +496,7 @@ src/
 - **Versionamento**: Facilita versionamento da API
 - **Performance**: Controle sobre quais campos são serializados
 
-### 10. Testes com H2 em Memória
+### 11. Testes com H2 em Memória
 
 **Justificativa**:
 
