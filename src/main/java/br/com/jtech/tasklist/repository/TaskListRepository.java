@@ -13,11 +13,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-/**
-* class TaskListRepository 
-* 
-* @author jtech
-*/
+
 @Repository
 public interface TaskListRepository extends JpaRepository<TaskListEntity, UUID> {
     

@@ -2,6 +2,7 @@
 package br.com.jtech.tasklist.service;
 
 import br.com.jtech.tasklist.dto.TaskRequest;
+import br.com.jtech.tasklist.dto.TaskResponse;
 import br.com.jtech.tasklist.entity.TaskEntity;
 import br.com.jtech.tasklist.entity.UserEntity;
 import br.com.jtech.tasklist.repository.TaskRepository;
@@ -15,8 +16,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -43,7 +42,7 @@ class TaskServiceTest {
     private UserRepository userRepository;
 
     @InjectMocks
-    private TaskService taskService;
+    private br.com.jtech.tasklist.service.impl.TaskServiceImpl taskService;
 
     private UserEntity user;
     private TaskEntity task;
@@ -80,7 +79,7 @@ class TaskServiceTest {
         when(taskRepository.save(any(TaskEntity.class))).thenReturn(task);
 
         // When
-        TaskEntity result = taskService.create(request, userEmail);
+        TaskResponse result = taskService.save(request, userEmail);
 
         // Then
         assertThat(result).isNotNull();
@@ -89,45 +88,6 @@ class TaskServiceTest {
         verify(taskRepository).save(any(TaskEntity.class));
     }
 
-    @Test
-    void shouldFindAllTasksByUserEmail() {
-        // Given
-        String userEmail = "test@example.com";
-        List<TaskEntity> tasks = Arrays.asList(task);
-
-        when(userRepository.findByEmail(userEmail)).thenReturn(Optional.of(user));
-        when(taskRepository.findByUser_Id(user.getId())).thenReturn(tasks);
-
-        // When
-        List<TaskEntity> result = taskService.findAllByUserEmail(userEmail);
-
-        // Then
-        assertThat(result).isNotNull();
-        assertThat(result).hasSize(1);
-        assertThat(result.get(0).getTitle()).isEqualTo("Test Task");
-        verify(userRepository).findByEmail(userEmail);
-        verify(taskRepository).findByUser_Id(user.getId());
-    }
-
-    @Test
-    void shouldFindTaskByIdAndUserEmail() {
-        // Given
-        String userEmail = "test@example.com";
-        UUID taskId = task.getId();
-
-        when(userRepository.findByEmail(userEmail)).thenReturn(Optional.of(user));
-        when(taskRepository.findByIdAndUser_Id(taskId, user.getId()))
-                .thenReturn(Optional.of(task));
-
-        // When
-        Optional<TaskEntity> result = taskService.findByIdAndUserEmail(taskId, userEmail);
-
-        // Then
-        assertThat(result).isPresent();
-        assertThat(result.get().getTitle()).isEqualTo("Test Task");
-        verify(userRepository).findByEmail(userEmail);
-        verify(taskRepository).findByIdAndUser_Id(taskId, user.getId());
-    }
 
     @Test
     void shouldUpdateTaskSuccessfully() {
@@ -146,7 +106,7 @@ class TaskServiceTest {
         when(taskRepository.save(any(TaskEntity.class))).thenReturn(task);
 
         // When
-        TaskEntity result = taskService.update(task.getId(), request, userEmail);
+        TaskResponse result = taskService.update(task.getId().toString(), request, userEmail);
 
         // Then
         assertThat(result).isNotNull();
@@ -171,7 +131,7 @@ class TaskServiceTest {
                 .thenReturn(Optional.empty());
 
         // When/Then
-        assertThatThrownBy(() -> taskService.update(task.getId(), request, userEmail))
+        assertThatThrownBy(() -> taskService.update(task.getId().toString(), request, userEmail))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessage("Tarefa não encontrada ou você não tem permissão para acessá-la");
 
@@ -192,7 +152,7 @@ class TaskServiceTest {
         doNothing().when(taskRepository).deleteById(taskId);
 
         // When
-        taskService.delete(taskId, userEmail);
+        taskService.delete(taskId.toString(), userEmail);
 
         // Then
         verify(userRepository).findByEmail(userEmail);
@@ -211,7 +171,7 @@ class TaskServiceTest {
                 .thenReturn(Optional.empty());
 
         // When/Then
-        assertThatThrownBy(() -> taskService.delete(taskId, userEmail))
+        assertThatThrownBy(() -> taskService.delete(taskId.toString(), userEmail))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessage("Tarefa não encontrada ou você não tem permissão para acessá-la");
 

@@ -1,117 +1,27 @@
-/*
-*  @(#)TaskListService.java
-*
-*  Copyright (c) J-Tech Solucoes em Informatica.
-*  All Rights Reserved.
-*
-*  This software is the confidential and proprietary information of J-Tech.
-*  ("Confidential Information"). You shall not disclose such Confidential
-*  Information and shall use it only in accordance with the terms of the
-*  license agreement you entered into with J-Tech.
-*
-*/
 package br.com.jtech.tasklist.service;
 
+import br.com.jtech.tasklist.dto.TaskListFilterDTO;
 import br.com.jtech.tasklist.dto.TaskListRequest;
+import br.com.jtech.tasklist.dto.TaskListResponse;
 import br.com.jtech.tasklist.entity.TaskListEntity;
-import br.com.jtech.tasklist.entity.UserEntity;
-import br.com.jtech.tasklist.repository.TaskListRepository;
-import br.com.jtech.tasklist.repository.UserRepository;
-import br.com.jtech.tasklist.config.infra.exceptions.ResourceNotFoundException;
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 
-/**
-* class TaskListService 
-* 
-* @author jtech
-*/
-@Service
-@RequiredArgsConstructor
-@Transactional
-public class TaskListService {
+public interface TaskListService {
 
-    private final TaskListRepository taskListRepository;
-    private final UserRepository userRepository;
+    Page<TaskListResponse> findAll(TaskListFilterDTO filter, Pageable pageable, String userEmail);
 
-    public TaskListEntity create(TaskListRequest request, String userEmail) {
-        UserEntity user = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado"));
+    List<TaskListResponse> list(TaskListFilterDTO filter, String userEmail);
 
-        TaskListEntity taskList = TaskListEntity.builder()
-                .name(request.getName())
-                .user(user)
-                .build();
+    TaskListResponse findById(String id, String userEmail);
 
-        return taskListRepository.save(taskList);
-    }
+    TaskListResponse save(TaskListRequest request, String userEmail);
 
-    public List<TaskListEntity> findAllByUserEmail(String userEmail) {
-        UserEntity user = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado"));
+    TaskListResponse update(String id, TaskListRequest request, String userEmail);
 
-        return taskListRepository.findByUser_Id(user.getId());
-    }
+    void delete(String id, String userEmail);
 
-    public List<TaskListEntity> findAllByUserEmailAndName(String userEmail, String name) {
-        UserEntity user = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado"));
-
-        if (name == null || name.trim().isEmpty() || name.equals("")) {
-            return taskListRepository.findByUser_Id(user.getId());
-        }
-
-        return taskListRepository.findByUser_IdAndNameContainingIgnoreCase(user.getId(), name.trim());
-    }
-
-    public Page<TaskListEntity> findAllByUserEmailPaginated(String userEmail, int page, int size, String name) {
-        UserEntity user = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado"));
-
-        Pageable pageable = PageRequest.of(page, size);
-
-        if (name == null || name.trim().isEmpty() || name.equals("")) {
-            return taskListRepository.findByUser_Id(user.getId(), pageable);
-        }
-
-        return taskListRepository.findByUser_IdAndNameContainingIgnoreCase(user.getId(), name.trim(), pageable);
-    }
-
-    public Optional<TaskListEntity> findByIdAndUserEmail(UUID id, String userEmail) {
-        UserEntity user = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado"));
-
-        return taskListRepository.findByIdAndUser_Id(id, user.getId());
-    }
-
-    public TaskListEntity update(UUID id, TaskListRequest request, String userEmail) {
-        UserEntity user = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado"));
-
-        TaskListEntity existingList = taskListRepository.findByIdAndUser_Id(id, user.getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Lista não encontrada ou você não tem permissão para acessá-la"));
-
-        existingList.setName(request.getName());
-
-        return taskListRepository.save(existingList);
-    }
-
-    public void delete(UUID id, String userEmail) {
-        UserEntity user = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado"));
-
-        TaskListEntity taskList = taskListRepository.findByIdAndUser_Id(id, user.getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Lista não encontrada ou você não tem permissão para acessá-la"));
-
-        taskListRepository.deleteById(taskList.getId());
-    }
+    TaskListEntity convert(TaskListRequest dto, String userEmail);
 }
-

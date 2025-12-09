@@ -42,7 +42,7 @@ class AuthServiceTest {
     private JwtTokenProvider jwtTokenProvider;
 
     @InjectMocks
-    private AuthService authService;
+    private br.com.jtech.tasklist.service.impl.AuthServiceImpl authService;
 
     private UserEntity user;
 

@@ -8,11 +8,7 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 import java.util.UUID;
 
-/**
-* class UserRepository 
-* 
-* @author jtech
-*/
+
 @Repository
 public interface UserRepository extends JpaRepository<UserEntity, UUID> {
     

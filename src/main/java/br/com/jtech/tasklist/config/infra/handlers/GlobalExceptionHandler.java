@@ -12,6 +12,7 @@
 package br.com.jtech.tasklist.config.infra.handlers;
 
 import br.com.jtech.tasklist.config.infra.exceptions.*;
+import io.swagger.v3.oas.annotations.Hidden;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -33,6 +34,7 @@ import java.util.List;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    @Hidden
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiError> handleValidationErrors(MethodArgumentNotValidException ex) {
         ApiError error = new ApiError(HttpStatus.BAD_REQUEST);
@@ -43,6 +45,7 @@ public class GlobalExceptionHandler {
         return buildResponseEntity(error);
     }
 
+    @Hidden
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ApiError> handleIllegalArgumentException(IllegalArgumentException ex) {
         ApiError error = new ApiError(HttpStatus.BAD_REQUEST);
@@ -52,6 +55,7 @@ public class GlobalExceptionHandler {
         return buildResponseEntity(error);
     }
 
+    @Hidden
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ApiError> handleResourceNotFoundException(ResourceNotFoundException ex) {
         ApiError error = new ApiError(HttpStatus.NOT_FOUND);
@@ -61,6 +65,7 @@ public class GlobalExceptionHandler {
         return buildResponseEntity(error);
     }
 
+    @Hidden
     @ExceptionHandler(UnauthorizedException.class)
     public ResponseEntity<ApiError> handleUnauthorizedException(UnauthorizedException ex) {
         ApiError error = new ApiError(HttpStatus.FORBIDDEN);
@@ -70,6 +75,7 @@ public class GlobalExceptionHandler {
         return buildResponseEntity(error);
     }
 
+    @Hidden
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<ApiError> handleBadCredentialsException(BadCredentialsException ex) {
         ApiError error = new ApiError(HttpStatus.UNAUTHORIZED);
@@ -79,6 +85,7 @@ public class GlobalExceptionHandler {
         return buildResponseEntity(error);
     }
 
+    @Hidden
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiError> handleGenericException(Exception ex) {
         ApiError error = new ApiError(HttpStatus.INTERNAL_SERVER_ERROR);
