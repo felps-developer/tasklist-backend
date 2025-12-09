@@ -12,7 +12,9 @@
 */
 package br.com.jtech.tasklist.service;
 
+import br.com.jtech.tasklist.dto.AuthRequest;
 import br.com.jtech.tasklist.dto.AuthResponse;
+import br.com.jtech.tasklist.dto.RegisterRequest;
 import br.com.jtech.tasklist.dto.UserResponse;
 import br.com.jtech.tasklist.entity.UserEntity;
 import br.com.jtech.tasklist.repository.UserRepository;
@@ -36,25 +38,25 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
 
-    public UserEntity register(String name, String email, String password) {
-        if (userRepository.existsByEmail(email)) {
+    public UserEntity register(RegisterRequest request) {
+        if (userRepository.existsByEmail(request.getEmail())) {
             throw new IllegalArgumentException("Email já está em uso");
         }
 
         UserEntity user = UserEntity.builder()
-                .name(name)
-                .email(email)
-                .password(passwordEncoder.encode(password))
+                .name(request.getName())
+                .email(request.getEmail())
+                .password(passwordEncoder.encode(request.getPassword()))
                 .build();
 
         return userRepository.save(user);
     }
 
-    public AuthResponse login(String email, String password) {
-        UserEntity user = userRepository.findByEmail(email)
+    public AuthResponse login(AuthRequest request) {
+        UserEntity user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new org.springframework.security.authentication.BadCredentialsException("Credenciais inválidas"));
 
-        if (!passwordEncoder.matches(password, user.getPassword())) {
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new org.springframework.security.authentication.BadCredentialsException("Credenciais inválidas");
         }
 

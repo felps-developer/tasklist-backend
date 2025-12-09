@@ -38,13 +38,13 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<Void> register(@Valid @RequestBody RegisterRequest request) {
-        authService.register(request.getName(), request.getEmail(), request.getPassword());
+        authService.register(request);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody AuthRequest request) {
-        AuthResponse response = authService.login(request.getEmail(), request.getPassword());
+        AuthResponse response = authService.login(request);
         return ResponseEntity.ok(response);
     }
 

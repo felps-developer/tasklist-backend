@@ -45,13 +45,7 @@ public class TaskController {
     public ResponseEntity<TaskResponse> create(@Valid @RequestBody TaskRequest request, Authentication authentication) {
         String userEmail = authentication.getName();
         
-        TaskEntity created = taskService.create(
-            request.getTitle(), 
-            request.getDescription(), 
-            request.getCompleted(), 
-            request.getTaskListId(),
-            userEmail
-        );
+        TaskEntity created = taskService.create(request, userEmail);
         
         return ResponseEntity.status(HttpStatus.CREATED).body(toResponse(created));
     }
@@ -149,14 +143,7 @@ public class TaskController {
             throw new ResourceNotFoundException("Tarefa não encontrada");
         }
         
-        TaskEntity updated = taskService.update(
-            UUID.fromString(id),
-            request.getTitle(),
-            request.getDescription(),
-            request.getCompleted(),
-            request.getTaskListId(),
-            userEmail
-        );
+        TaskEntity updated = taskService.update(UUID.fromString(id), request, userEmail);
         
         return ResponseEntity.ok(toResponse(updated));
     }

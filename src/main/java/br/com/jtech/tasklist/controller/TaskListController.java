@@ -45,7 +45,7 @@ public class TaskListController {
     public ResponseEntity<TaskListResponse> create(@Valid @RequestBody TaskListRequest request, Authentication authentication) {
         String userEmail = authentication.getName();
         
-        TaskListEntity created = taskListService.create(request.getName(), userEmail);
+        TaskListEntity created = taskListService.create(request, userEmail);
         
         return ResponseEntity.status(HttpStatus.CREATED).body(toResponse(created));
     }
@@ -126,11 +126,7 @@ public class TaskListController {
             throw new ResourceNotFoundException("Lista não encontrada");
         }
         
-        TaskListEntity updated = taskListService.update(
-            UUID.fromString(id),
-            request.getName(),
-            userEmail
-        );
+        TaskListEntity updated = taskListService.update(UUID.fromString(id), request, userEmail);
         
         return ResponseEntity.ok(toResponse(updated));
     }

@@ -12,6 +12,7 @@
 */
 package br.com.jtech.tasklist.service;
 
+import br.com.jtech.tasklist.dto.TaskRequest;
 import br.com.jtech.tasklist.entity.TaskEntity;
 import br.com.jtech.tasklist.entity.TaskListEntity;
 import br.com.jtech.tasklist.entity.UserEntity;
@@ -44,20 +45,20 @@ public class TaskService {
     private final TaskListRepository taskListRepository;
     private final UserRepository userRepository;
 
-    public TaskEntity create(String title, String description, Boolean completed, String taskListId, String userEmail) {
+    public TaskEntity create(TaskRequest request, String userEmail) {
         UserEntity user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado"));
 
         TaskListEntity taskList = null;
-        if (taskListId != null && !taskListId.isEmpty() && !taskListId.equals("undefined") && isValidUUID(taskListId)) {
-            taskList = taskListRepository.findByIdAndUser_Id(UUID.fromString(taskListId), user.getId())
+        if (request.getTaskListId() != null && !request.getTaskListId().isEmpty() && !request.getTaskListId().equals("undefined") && isValidUUID(request.getTaskListId())) {
+            taskList = taskListRepository.findByIdAndUser_Id(UUID.fromString(request.getTaskListId()), user.getId())
                     .orElseThrow(() -> new ResourceNotFoundException("Lista não encontrada ou você não tem permissão para acessá-la"));
         }
 
         TaskEntity task = TaskEntity.builder()
-                .title(title)
-                .description(description)
-                .completed(completed != null ? completed : false)
+                .title(request.getTitle())
+                .description(request.getDescription())
+                .completed(request.getCompleted() != null ? request.getCompleted() : false)
                 .user(user)
                 .taskList(taskList)
                 .build();
@@ -134,22 +135,22 @@ public class TaskService {
         return taskRepository.findByIdAndUser_Id(id, user.getId());
     }
 
-    public TaskEntity update(UUID id, String title, String description, Boolean completed, String taskListId, String userEmail) {
+    public TaskEntity update(UUID id, TaskRequest request, String userEmail) {
         UserEntity user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado"));
 
         TaskEntity existingTask = taskRepository.findByIdAndUser_Id(id, user.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Tarefa não encontrada ou você não tem permissão para acessá-la"));
 
-        existingTask.setTitle(title);
-        existingTask.setDescription(description);
-        if (completed != null) {
-            existingTask.setCompleted(completed);
+        existingTask.setTitle(request.getTitle());
+        existingTask.setDescription(request.getDescription());
+        if (request.getCompleted() != null) {
+            existingTask.setCompleted(request.getCompleted());
         }
 
         // Atualizar lista da tarefa
-        if (taskListId != null && !taskListId.isEmpty() && !taskListId.equals("undefined") && isValidUUID(taskListId)) {
-            TaskListEntity taskList = taskListRepository.findByIdAndUser_Id(UUID.fromString(taskListId), user.getId())
+        if (request.getTaskListId() != null && !request.getTaskListId().isEmpty() && !request.getTaskListId().equals("undefined") && isValidUUID(request.getTaskListId())) {
+            TaskListEntity taskList = taskListRepository.findByIdAndUser_Id(UUID.fromString(request.getTaskListId()), user.getId())
                     .orElseThrow(() -> new ResourceNotFoundException("Lista não encontrada ou você não tem permissão para acessá-la"));
             existingTask.setTaskList(taskList);
         } else {

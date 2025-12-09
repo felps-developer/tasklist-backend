@@ -1,17 +1,7 @@
-/*
-*  @(#)TaskServiceTest.java
-*
-*  Copyright (c) J-Tech Solucoes em Informatica.
-*  All Rights Reserved.
-*
-*  This software is the confidential and proprietary information of J-Tech.
-*  ("Confidential Information"). You shall not disclose such Confidential
-*  Information and shall use it only in accordance with the terms of the
-*  license agreement you entered into with J-Tech.
-*
-*/
+
 package br.com.jtech.tasklist.service;
 
+import br.com.jtech.tasklist.dto.TaskRequest;
 import br.com.jtech.tasklist.entity.TaskEntity;
 import br.com.jtech.tasklist.entity.UserEntity;
 import br.com.jtech.tasklist.repository.TaskRepository;
@@ -79,15 +69,18 @@ class TaskServiceTest {
     void shouldCreateTaskSuccessfully() {
         // Given
         String userEmail = "test@example.com";
-        String title = "New Task";
-        String description = "New Description";
-        Boolean completed = false;
+        TaskRequest request = TaskRequest.builder()
+                .title("New Task")
+                .description("New Description")
+                .completed(false)
+                .taskListId(null)
+                .build();
 
         when(userRepository.findByEmail(userEmail)).thenReturn(Optional.of(user));
         when(taskRepository.save(any(TaskEntity.class))).thenReturn(task);
 
         // When
-        TaskEntity result = taskService.create(title, description, completed, null, userEmail);
+        TaskEntity result = taskService.create(request, userEmail);
 
         // Then
         assertThat(result).isNotNull();
@@ -140,9 +133,12 @@ class TaskServiceTest {
     void shouldUpdateTaskSuccessfully() {
         // Given
         String userEmail = "test@example.com";
-        String updatedTitle = "Updated Task";
-        String updatedDescription = "Updated Description";
-        Boolean completed = true;
+        TaskRequest request = TaskRequest.builder()
+                .title("Updated Task")
+                .description("Updated Description")
+                .completed(true)
+                .taskListId(null)
+                .build();
 
         when(userRepository.findByEmail(userEmail)).thenReturn(Optional.of(user));
         when(taskRepository.findByIdAndUser_Id(task.getId(), user.getId()))
@@ -150,7 +146,7 @@ class TaskServiceTest {
         when(taskRepository.save(any(TaskEntity.class))).thenReturn(task);
 
         // When
-        TaskEntity result = taskService.update(task.getId(), updatedTitle, updatedDescription, completed, null, userEmail);
+        TaskEntity result = taskService.update(task.getId(), request, userEmail);
 
         // Then
         assertThat(result).isNotNull();
@@ -163,14 +159,19 @@ class TaskServiceTest {
     void shouldThrowExceptionWhenTaskNotFoundForUpdate() {
         // Given
         String userEmail = "test@example.com";
-        String updatedTitle = "Updated Task";
+        TaskRequest request = TaskRequest.builder()
+                .title("Updated Task")
+                .description(null)
+                .completed(null)
+                .taskListId(null)
+                .build();
 
         when(userRepository.findByEmail(userEmail)).thenReturn(Optional.of(user));
         when(taskRepository.findByIdAndUser_Id(task.getId(), user.getId()))
                 .thenReturn(Optional.empty());
 
         // When/Then
-        assertThatThrownBy(() -> taskService.update(task.getId(), updatedTitle, null, null, null, userEmail))
+        assertThatThrownBy(() -> taskService.update(task.getId(), request, userEmail))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessage("Tarefa não encontrada ou você não tem permissão para acessá-la");
 

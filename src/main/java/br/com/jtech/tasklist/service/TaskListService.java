@@ -12,6 +12,7 @@
 */
 package br.com.jtech.tasklist.service;
 
+import br.com.jtech.tasklist.dto.TaskListRequest;
 import br.com.jtech.tasklist.entity.TaskListEntity;
 import br.com.jtech.tasklist.entity.UserEntity;
 import br.com.jtech.tasklist.repository.TaskListRepository;
@@ -41,12 +42,12 @@ public class TaskListService {
     private final TaskListRepository taskListRepository;
     private final UserRepository userRepository;
 
-    public TaskListEntity create(String name, String userEmail) {
+    public TaskListEntity create(TaskListRequest request, String userEmail) {
         UserEntity user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado"));
 
         TaskListEntity taskList = TaskListEntity.builder()
-                .name(name)
+                .name(request.getName())
                 .user(user)
                 .build();
 
@@ -91,14 +92,14 @@ public class TaskListService {
         return taskListRepository.findByIdAndUser_Id(id, user.getId());
     }
 
-    public TaskListEntity update(UUID id, String name, String userEmail) {
+    public TaskListEntity update(UUID id, TaskListRequest request, String userEmail) {
         UserEntity user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado"));
 
         TaskListEntity existingList = taskListRepository.findByIdAndUser_Id(id, user.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Lista não encontrada ou você não tem permissão para acessá-la"));
 
-        existingList.setName(name);
+        existingList.setName(request.getName());
 
         return taskListRepository.save(existingList);
     }

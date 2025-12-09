@@ -1,18 +1,9 @@
-/*
-*  @(#)AuthServiceTest.java
-*
-*  Copyright (c) J-Tech Solucoes em Informatica.
-*  All Rights Reserved.
-*
-*  This software is the confidential and proprietary information of J-Tech.
-*  ("Confidential Information"). You shall not disclose such Confidential
-*  Information and shall use it only in accordance with the terms of the
-*  license agreement you entered into with J-Tech.
-*
-*/
+
 package br.com.jtech.tasklist.service;
 
+import br.com.jtech.tasklist.dto.AuthRequest;
 import br.com.jtech.tasklist.dto.AuthResponse;
+import br.com.jtech.tasklist.dto.RegisterRequest;
 import br.com.jtech.tasklist.entity.UserEntity;
 import br.com.jtech.tasklist.repository.UserRepository;
 import br.com.jtech.tasklist.config.infra.security.JwtTokenProvider;
@@ -68,101 +59,111 @@ class AuthServiceTest {
     @Test
     void shouldRegisterUserSuccessfully() {
         // Given
-        String name = "New User";
-        String email = "new@example.com";
-        String password = "password123";
+        RegisterRequest request = RegisterRequest.builder()
+                .name("New User")
+                .email("new@example.com")
+                .password("password123")
+                .build();
 
-        when(userRepository.existsByEmail(email)).thenReturn(false);
-        when(passwordEncoder.encode(password)).thenReturn("encodedPassword");
+        when(userRepository.existsByEmail(request.getEmail())).thenReturn(false);
+        when(passwordEncoder.encode(request.getPassword())).thenReturn("encodedPassword");
         when(userRepository.save(any(UserEntity.class))).thenReturn(user);
 
         // When
-        UserEntity result = authService.register(name, email, password);
+        UserEntity result = authService.register(request);
 
         // Then
         assertThat(result).isNotNull();
         assertThat(result.getEmail()).isEqualTo("test@example.com");
-        verify(userRepository).existsByEmail(email);
-        verify(passwordEncoder).encode(password);
+        verify(userRepository).existsByEmail(request.getEmail());
+        verify(passwordEncoder).encode(request.getPassword());
         verify(userRepository).save(any(UserEntity.class));
     }
 
     @Test
     void shouldThrowExceptionWhenEmailAlreadyExists() {
         // Given
-        String name = "New User";
-        String email = "existing@example.com";
-        String password = "password123";
+        RegisterRequest request = RegisterRequest.builder()
+                .name("New User")
+                .email("existing@example.com")
+                .password("password123")
+                .build();
 
-        when(userRepository.existsByEmail(email)).thenReturn(true);
+        when(userRepository.existsByEmail(request.getEmail())).thenReturn(true);
 
         // When/Then
-        assertThatThrownBy(() -> authService.register(name, email, password))
+        assertThatThrownBy(() -> authService.register(request))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("Email já está em uso");
 
-        verify(userRepository).existsByEmail(email);
+        verify(userRepository).existsByEmail(request.getEmail());
         verify(userRepository, never()).save(any(UserEntity.class));
     }
 
     @Test
     void shouldLoginSuccessfully() {
         // Given
-        String email = "test@example.com";
-        String password = "password123";
+        AuthRequest request = AuthRequest.builder()
+                .email("test@example.com")
+                .password("password123")
+                .build();
 
-        when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
-        when(passwordEncoder.matches(password, user.getPassword())).thenReturn(true);
-        when(jwtTokenProvider.generateToken(email)).thenReturn("accessToken");
-        when(jwtTokenProvider.generateRefreshToken(email)).thenReturn("refreshToken");
+        when(userRepository.findByEmail(request.getEmail())).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches(request.getPassword(), user.getPassword())).thenReturn(true);
+        when(jwtTokenProvider.generateToken(request.getEmail())).thenReturn("accessToken");
+        when(jwtTokenProvider.generateRefreshToken(request.getEmail())).thenReturn("refreshToken");
 
         // When
-        AuthResponse result = authService.login(email, password);
+        AuthResponse result = authService.login(request);
 
         // Then
         assertThat(result).isNotNull();
         assertThat(result.getAccessToken()).isEqualTo("accessToken");
         assertThat(result.getRefreshToken()).isEqualTo("refreshToken");
         assertThat(result.getTokenType()).isEqualTo("Bearer");
-        verify(userRepository).findByEmail(email);
-        verify(passwordEncoder).matches(password, user.getPassword());
-        verify(jwtTokenProvider).generateToken(email);
-        verify(jwtTokenProvider).generateRefreshToken(email);
+        verify(userRepository).findByEmail(request.getEmail());
+        verify(passwordEncoder).matches(request.getPassword(), user.getPassword());
+        verify(jwtTokenProvider).generateToken(request.getEmail());
+        verify(jwtTokenProvider).generateRefreshToken(request.getEmail());
     }
 
     @Test
     void shouldThrowExceptionWhenUserNotFound() {
         // Given
-        String email = "notfound@example.com";
-        String password = "password123";
+        AuthRequest request = AuthRequest.builder()
+                .email("notfound@example.com")
+                .password("password123")
+                .build();
 
-        when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
+        when(userRepository.findByEmail(request.getEmail())).thenReturn(Optional.empty());
 
         // When/Then
-        assertThatThrownBy(() -> authService.login(email, password))
+        assertThatThrownBy(() -> authService.login(request))
                 .isInstanceOf(org.springframework.security.authentication.BadCredentialsException.class)
                 .hasMessage("Credenciais inválidas");
 
-        verify(userRepository).findByEmail(email);
+        verify(userRepository).findByEmail(request.getEmail());
         verify(passwordEncoder, never()).matches(anyString(), anyString());
     }
 
     @Test
     void shouldThrowExceptionWhenPasswordDoesNotMatch() {
         // Given
-        String email = "test@example.com";
-        String password = "wrongPassword";
+        AuthRequest request = AuthRequest.builder()
+                .email("test@example.com")
+                .password("wrongPassword")
+                .build();
 
-        when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
-        when(passwordEncoder.matches(password, user.getPassword())).thenReturn(false);
+        when(userRepository.findByEmail(request.getEmail())).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches(request.getPassword(), user.getPassword())).thenReturn(false);
 
         // When/Then
-        assertThatThrownBy(() -> authService.login(email, password))
+        assertThatThrownBy(() -> authService.login(request))
                 .isInstanceOf(org.springframework.security.authentication.BadCredentialsException.class)
                 .hasMessage("Credenciais inválidas");
 
-        verify(userRepository).findByEmail(email);
-        verify(passwordEncoder).matches(password, user.getPassword());
+        verify(userRepository).findByEmail(request.getEmail());
+        verify(passwordEncoder).matches(request.getPassword(), user.getPassword());
         verify(jwtTokenProvider, never()).generateToken(anyString());
     }
 }
