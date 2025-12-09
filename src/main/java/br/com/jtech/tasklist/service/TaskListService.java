@@ -21,7 +21,7 @@ public interface TaskListService {
 
     TaskListResponse update(String id, TaskListRequest request, String userEmail);
 
-    void delete(String id, String userEmail);
+    void softDelete(String id, String userEmail);
 
     TaskListEntity convert(TaskListRequest dto, String userEmail);
 }

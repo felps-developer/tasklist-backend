@@ -164,7 +164,7 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     @Transactional(propagation = Propagation.SUPPORTS)
-    public void delete(String id, String userEmail) {
+    public void softDelete(String id, String userEmail) {
         if (!isValidUUID(id)) {
             throw new ResourceNotFoundException("Tarefa não encontrada");
         }
@@ -176,7 +176,8 @@ public class TaskServiceImpl implements TaskService {
                 .orElseThrow(() -> new ResourceNotFoundException("Tarefa não encontrada ou você não tem permissão para acessá-la"));
 
         try {
-            repository.deleteById(task.getId());
+            task.setActive(false);
+            repository.save(task);
         } catch (DataIntegrityViolationException ex) {
             throw new IllegalArgumentException("Registro não pode ser excluído, pois o mesmo tem registros relacionados.");
         }

@@ -17,18 +17,19 @@ import java.util.UUID;
 @Repository
 public interface TaskListRepository extends JpaRepository<TaskListEntity, UUID> {
     
+    @Query("SELECT tl FROM TaskListEntity tl WHERE tl.user.id = :userId AND tl.active = true")
     List<TaskListEntity> findByUser_Id(UUID userId);
     
-    @Query("SELECT tl FROM TaskListEntity tl WHERE tl.user.id = :userId AND LOWER(tl.name) LIKE LOWER(CONCAT('%', :name, '%'))")
+    @Query("SELECT tl FROM TaskListEntity tl WHERE tl.user.id = :userId AND tl.active = true AND LOWER(tl.name) LIKE LOWER(CONCAT('%', :name, '%'))")
     List<TaskListEntity> findByUser_IdAndNameContainingIgnoreCase(@Param("userId") UUID userId, @Param("name") String name);
     
+    @Query("SELECT tl FROM TaskListEntity tl WHERE tl.user.id = :userId AND tl.active = true")
     Page<TaskListEntity> findByUser_Id(UUID userId, Pageable pageable);
     
-    @Query("SELECT tl FROM TaskListEntity tl WHERE tl.user.id = :userId AND LOWER(tl.name) LIKE LOWER(CONCAT('%', :name, '%'))")
+    @Query("SELECT tl FROM TaskListEntity tl WHERE tl.user.id = :userId AND tl.active = true AND LOWER(tl.name) LIKE LOWER(CONCAT('%', :name, '%'))")
     Page<TaskListEntity> findByUser_IdAndNameContainingIgnoreCase(@Param("userId") UUID userId, @Param("name") String name, Pageable pageable);
     
+    @Query("SELECT tl FROM TaskListEntity tl WHERE tl.id = :id AND tl.user.id = :userId AND tl.active = true")
     Optional<TaskListEntity> findByIdAndUser_Id(UUID id, UUID userId);
-    
-    boolean existsByIdAndUser_Id(UUID id, UUID userId);
 }
 

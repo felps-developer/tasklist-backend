@@ -17,28 +17,31 @@ import java.util.UUID;
 @Repository
 public interface TaskRepository extends JpaRepository<TaskEntity, UUID> {
     
+    @Query("SELECT t FROM TaskEntity t WHERE t.user.id = :userId AND t.active = true")
     List<TaskEntity> findByUser_Id(UUID userId);
     
+    @Query("SELECT t FROM TaskEntity t WHERE t.user.id = :userId AND t.active = true")
     Page<TaskEntity> findByUser_Id(UUID userId, Pageable pageable);
     
-    @Query("SELECT t FROM TaskEntity t WHERE t.user.id = :userId AND LOWER(t.title) LIKE LOWER(CONCAT('%', :title, '%'))")
+    @Query("SELECT t FROM TaskEntity t WHERE t.user.id = :userId AND t.active = true AND LOWER(t.title) LIKE LOWER(CONCAT('%', :title, '%'))")
     List<TaskEntity> findByUser_IdAndTitleContainingIgnoreCase(@Param("userId") UUID userId, @Param("title") String title);
     
-    @Query("SELECT t FROM TaskEntity t WHERE t.user.id = :userId AND LOWER(t.title) LIKE LOWER(CONCAT('%', :title, '%'))")
+    @Query("SELECT t FROM TaskEntity t WHERE t.user.id = :userId AND t.active = true AND LOWER(t.title) LIKE LOWER(CONCAT('%', :title, '%'))")
     Page<TaskEntity> findByUser_IdAndTitleContainingIgnoreCase(@Param("userId") UUID userId, @Param("title") String title, Pageable pageable);
     
+    @Query("SELECT t FROM TaskEntity t WHERE t.taskList.id = :taskListId AND t.user.id = :userId AND t.active = true")
     List<TaskEntity> findByTaskList_IdAndUser_Id(UUID taskListId, UUID userId);
     
+    @Query("SELECT t FROM TaskEntity t WHERE t.taskList.id = :taskListId AND t.user.id = :userId AND t.active = true")
     Page<TaskEntity> findByTaskList_IdAndUser_Id(UUID taskListId, UUID userId, Pageable pageable);
     
-    @Query("SELECT t FROM TaskEntity t WHERE t.taskList.id = :taskListId AND t.user.id = :userId AND LOWER(t.title) LIKE LOWER(CONCAT('%', :title, '%'))")
+    @Query("SELECT t FROM TaskEntity t WHERE t.taskList.id = :taskListId AND t.user.id = :userId AND t.active = true AND LOWER(t.title) LIKE LOWER(CONCAT('%', :title, '%'))")
     List<TaskEntity> findByTaskList_IdAndUser_IdAndTitleContainingIgnoreCase(@Param("taskListId") UUID taskListId, @Param("userId") UUID userId, @Param("title") String title);
     
-    @Query("SELECT t FROM TaskEntity t WHERE t.taskList.id = :taskListId AND t.user.id = :userId AND LOWER(t.title) LIKE LOWER(CONCAT('%', :title, '%'))")
+    @Query("SELECT t FROM TaskEntity t WHERE t.taskList.id = :taskListId AND t.user.id = :userId AND t.active = true AND LOWER(t.title) LIKE LOWER(CONCAT('%', :title, '%'))")
     Page<TaskEntity> findByTaskList_IdAndUser_IdAndTitleContainingIgnoreCase(@Param("taskListId") UUID taskListId, @Param("userId") UUID userId, @Param("title") String title, Pageable pageable);
     
+    @Query("SELECT t FROM TaskEntity t WHERE t.id = :id AND t.user.id = :userId AND t.active = true")
     Optional<TaskEntity> findByIdAndUser_Id(UUID id, UUID userId);
-    
-    boolean existsByIdAndUser_Id(UUID id, UUID userId);
 }
 

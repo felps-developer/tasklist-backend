@@ -52,7 +52,7 @@ public class TaskController {
     }
 
     @GetMapping("/all")
-    public List<TaskResponse> findAllWithoutPagination(
+    public List<TaskResponse> list(
             @Valid @ModelAttribute TaskFilterDTO filter,
             Authentication authentication) {
         String userEmail = authentication.getName();
@@ -77,13 +77,13 @@ public class TaskController {
         return taskService.update(id, request, userEmail);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{id}/soft")
     @ResponseStatus(code = HttpStatus.NO_CONTENT)
-    public void delete(
+    public void softDelete(
             @PathVariable String id,
             Authentication authentication) {
         String userEmail = authentication.getName();
-        taskService.delete(id, userEmail);
+        taskService.softDelete(id, userEmail);
     }
 }
 

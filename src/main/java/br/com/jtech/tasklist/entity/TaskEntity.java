@@ -33,6 +33,10 @@ public class TaskEntity {
     @Builder.Default
     private Boolean completed = false;
 
+    @Column(nullable = false)
+    @Builder.Default
+    private Boolean active = true;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private UserEntity user;

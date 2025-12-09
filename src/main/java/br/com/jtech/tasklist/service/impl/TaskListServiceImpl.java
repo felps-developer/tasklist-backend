@@ -137,7 +137,7 @@ public class TaskListServiceImpl implements TaskListService {
 
     @Override
     @Transactional(propagation = Propagation.SUPPORTS)
-    public void delete(String id, String userEmail) {
+    public void softDelete(String id, String userEmail) {
         if (id == null || id.equals("all") || !isValidUUID(id)) {
             throw new ResourceNotFoundException("Lista não encontrada");
         }
@@ -149,7 +149,8 @@ public class TaskListServiceImpl implements TaskListService {
                 .orElseThrow(() -> new ResourceNotFoundException("Lista não encontrada ou você não tem permissão para acessá-la"));
 
         try {
-            repository.deleteById(taskList.getId());
+            taskList.setActive(false);
+            repository.save(taskList);
         } catch (DataIntegrityViolationException ex) {
             throw new IllegalArgumentException("Registro não pode ser excluído, pois o mesmo tem registros relacionados.");
         }
