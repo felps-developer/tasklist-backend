@@ -15,6 +15,7 @@ package br.com.jtech.tasklist.service;
 import br.com.jtech.tasklist.entity.TaskEntity;
 import br.com.jtech.tasklist.entity.UserEntity;
 import br.com.jtech.tasklist.repository.TaskRepository;
+import br.com.jtech.tasklist.repository.TaskListRepository;
 import br.com.jtech.tasklist.repository.UserRepository;
 import br.com.jtech.tasklist.config.infra.exceptions.ResourceNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
@@ -44,6 +45,9 @@ class TaskServiceTest {
 
     @Mock
     private TaskRepository taskRepository;
+
+    @Mock
+    private TaskListRepository taskListRepository;
 
     @Mock
     private UserRepository userRepository;
@@ -83,7 +87,7 @@ class TaskServiceTest {
         when(taskRepository.save(any(TaskEntity.class))).thenReturn(task);
 
         // When
-        TaskEntity result = taskService.create(title, description, completed, userEmail);
+        TaskEntity result = taskService.create(title, description, completed, null, userEmail);
 
         // Then
         assertThat(result).isNotNull();
@@ -146,7 +150,7 @@ class TaskServiceTest {
         when(taskRepository.save(any(TaskEntity.class))).thenReturn(task);
 
         // When
-        TaskEntity result = taskService.update(task.getId(), updatedTitle, updatedDescription, completed, userEmail);
+        TaskEntity result = taskService.update(task.getId(), updatedTitle, updatedDescription, completed, null, userEmail);
 
         // Then
         assertThat(result).isNotNull();
@@ -166,7 +170,7 @@ class TaskServiceTest {
                 .thenReturn(Optional.empty());
 
         // When/Then
-        assertThatThrownBy(() -> taskService.update(task.getId(), updatedTitle, null, null, userEmail))
+        assertThatThrownBy(() -> taskService.update(task.getId(), updatedTitle, null, null, null, userEmail))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessage("Tarefa não encontrada ou você não tem permissão para acessá-la");
 

@@ -1,5 +1,5 @@
 /*
-*  @(#)TaskControllerIntegrationTest.java
+*  @(#)TaskListControllerIntegrationTest.java
 *
 *  Copyright (c) J-Tech Solucoes em Informatica.
 *  All Rights Reserved.
@@ -28,7 +28,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
-* class TaskControllerIntegrationTest 
+* class TaskListControllerIntegrationTest 
 * 
 * @author jtech
 */
@@ -36,7 +36,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @Transactional
-class TaskControllerIntegrationTest {
+class TaskListControllerIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -51,8 +51,8 @@ class TaskControllerIntegrationTest {
         // Register and login to get token
         String registerBody = """
             {
-                "name": "Task User",
-                "email": "taskuser@example.com",
+                "name": "TaskList User",
+                "email": "tasklistuser@example.com",
                 "password": "password123"
             }
             """;
@@ -64,7 +64,7 @@ class TaskControllerIntegrationTest {
 
         String loginBody = """
             {
-                "email": "taskuser@example.com",
+                "email": "tasklistuser@example.com",
                 "password": "password123"
             }
             """;
@@ -81,84 +81,124 @@ class TaskControllerIntegrationTest {
     }
 
     @Test
-    void shouldCreateTaskSuccessfully() throws Exception {
-        String taskBody = """
+    void shouldCreateTaskListSuccessfully() throws Exception {
+        String taskListBody = """
             {
-                "title": "Test Task",
-                "description": "Test Description",
-                "completed": false
+                "name": "Test List"
             }
             """;
 
-        mockMvc.perform(post("/api/v1/tasks")
+        mockMvc.perform(post("/api/v1/task-lists")
                 .header("Authorization", "Bearer " + accessToken)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(taskBody))
+                .content(taskListBody))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").exists())
-                .andExpect(jsonPath("$.title").value("Test Task"))
-                .andExpect(jsonPath("$.description").value("Test Description"))
-                .andExpect(jsonPath("$.completed").value(false));
+                .andExpect(jsonPath("$.name").value("Test List"));
     }
 
     @Test
     void shouldReturnUnauthorizedWhenTokenIsMissing() throws Exception {
-        String taskBody = """
+        String taskListBody = """
             {
-                "title": "Test Task",
-                "description": "Test Description"
+                "name": "Test List"
             }
             """;
 
-        int status = mockMvc.perform(post("/api/v1/tasks")
+        int status = mockMvc.perform(post("/api/v1/task-lists")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(taskBody))
+                .content(taskListBody))
                 .andReturn()
                 .getResponse()
                 .getStatus();
         
-        // Spring Security pode retornar 401 (Unauthorized) ou 403 (Forbidden) quando não há token
         assertTrue(status == 401 || status == 403, "Status deve ser 401 ou 403");
     }
 
     @Test
-    void shouldFindAllTasks() throws Exception {
-        // Create a task first
-        String taskBody = """
+    void shouldFindAllTaskLists() throws Exception {
+        // Create task lists first
+        String taskListBody1 = """
             {
-                "title": "Task 1",
-                "description": "Description 1"
+                "name": "List 1"
             }
             """;
 
-        mockMvc.perform(post("/api/v1/tasks")
+        String taskListBody2 = """
+            {
+                "name": "List 2"
+            }
+            """;
+
+        mockMvc.perform(post("/api/v1/task-lists")
                 .header("Authorization", "Bearer " + accessToken)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(taskBody))
+                .content(taskListBody1))
                 .andExpect(status().isCreated());
 
-        // Get all tasks
-        mockMvc.perform(get("/api/v1/tasks")
+        mockMvc.perform(post("/api/v1/task-lists")
+                .header("Authorization", "Bearer " + accessToken)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(taskListBody2))
+                .andExpect(status().isCreated());
+
+        // Get all task lists
+        mockMvc.perform(get("/api/v1/task-lists")
                 .header("Authorization", "Bearer " + accessToken))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").isArray())
-                .andExpect(jsonPath("$.content[0].title").value("Task 1"))
+                .andExpect(jsonPath("$.content[0].name").exists())
                 .andExpect(jsonPath("$.page").exists())
                 .andExpect(jsonPath("$.size").exists())
                 .andExpect(jsonPath("$.totalElements").exists());
     }
 
     @Test
-    void shouldUpdateTaskSuccessfully() throws Exception {
-        // Create a task first
-        String createBody = """
+    void shouldFindAllTaskListsWithoutPagination() throws Exception {
+        // Create task lists first
+        String taskListBody1 = """
             {
-                "title": "Original Task",
-                "description": "Original Description"
+                "name": "List 1"
             }
             """;
 
-        String response = mockMvc.perform(post("/api/v1/tasks")
+        String taskListBody2 = """
+            {
+                "name": "List 2"
+            }
+            """;
+
+        mockMvc.perform(post("/api/v1/task-lists")
+                .header("Authorization", "Bearer " + accessToken)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(taskListBody1))
+                .andExpect(status().isCreated());
+
+        mockMvc.perform(post("/api/v1/task-lists")
+                .header("Authorization", "Bearer " + accessToken)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(taskListBody2))
+                .andExpect(status().isCreated());
+
+        // Get all task lists without pagination
+        mockMvc.perform(get("/api/v1/task-lists/all")
+                .header("Authorization", "Bearer " + accessToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$[0].name").exists())
+                .andExpect(jsonPath("$[1].name").exists());
+    }
+
+    @Test
+    void shouldFindTaskListByIdSuccessfully() throws Exception {
+        // Create a task list first
+        String createBody = """
+            {
+                "name": "List to Find"
+            }
+            """;
+
+        String response = mockMvc.perform(post("/api/v1/task-lists")
                 .header("Authorization", "Bearer " + accessToken)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(createBody))
@@ -167,37 +207,70 @@ class TaskControllerIntegrationTest {
                 .getResponse()
                 .getContentAsString();
 
-        String taskId = objectMapper.readTree(response).get("id").asText();
+        String taskListId = objectMapper.readTree(response).get("id").asText();
 
-        // Update the task
-        String updateBody = """
+        // Get task list by ID
+        mockMvc.perform(get("/api/v1/task-lists/" + taskListId)
+                .header("Authorization", "Bearer " + accessToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(taskListId))
+                .andExpect(jsonPath("$.name").value("List to Find"));
+    }
+
+    @Test
+    void shouldReturnNotFoundWhenTaskListNotFound() throws Exception {
+        String nonExistentId = "00000000-0000-0000-0000-000000000000";
+        
+        mockMvc.perform(get("/api/v1/task-lists/" + nonExistentId)
+                .header("Authorization", "Bearer " + accessToken))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void shouldUpdateTaskListSuccessfully() throws Exception {
+        // Create a task list first
+        String createBody = """
             {
-                "title": "Updated Task",
-                "description": "Updated Description",
-                "completed": true
+                "name": "Original List"
             }
             """;
 
-        mockMvc.perform(put("/api/v1/tasks/" + taskId)
+        String response = mockMvc.perform(post("/api/v1/task-lists")
+                .header("Authorization", "Bearer " + accessToken)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(createBody))
+                .andExpect(status().isCreated())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        String taskListId = objectMapper.readTree(response).get("id").asText();
+
+        // Update the task list
+        String updateBody = """
+            {
+                "name": "Updated List"
+            }
+            """;
+
+        mockMvc.perform(put("/api/v1/task-lists/" + taskListId)
                 .header("Authorization", "Bearer " + accessToken)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(updateBody))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.title").value("Updated Task"))
-                .andExpect(jsonPath("$.completed").value(true));
+                .andExpect(jsonPath("$.name").value("Updated List"));
     }
 
     @Test
-    void shouldDeleteTaskSuccessfully() throws Exception {
-        // Create a task first
+    void shouldDeleteTaskListSuccessfully() throws Exception {
+        // Create a task list first
         String createBody = """
             {
-                "title": "Task to Delete",
-                "description": "Description"
+                "name": "List to Delete"
             }
             """;
 
-        String response = mockMvc.perform(post("/api/v1/tasks")
+        String response = mockMvc.perform(post("/api/v1/task-lists")
                 .header("Authorization", "Bearer " + accessToken)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(createBody))
@@ -206,116 +279,38 @@ class TaskControllerIntegrationTest {
                 .getResponse()
                 .getContentAsString();
 
-        String taskId = objectMapper.readTree(response).get("id").asText();
+        String taskListId = objectMapper.readTree(response).get("id").asText();
 
-        // Delete the task
-        mockMvc.perform(delete("/api/v1/tasks/" + taskId)
+        // Delete the task list
+        mockMvc.perform(delete("/api/v1/task-lists/" + taskListId)
                 .header("Authorization", "Bearer " + accessToken))
                 .andExpect(status().isNoContent());
 
-        // Verify task is deleted
-        mockMvc.perform(get("/api/v1/tasks/" + taskId)
+        // Verify task list is deleted
+        mockMvc.perform(get("/api/v1/task-lists/" + taskListId)
                 .header("Authorization", "Bearer " + accessToken))
                 .andExpect(status().isNotFound());
     }
 
     @Test
-    void shouldFindTaskByIdSuccessfully() throws Exception {
-        // Create a task first
-        String createBody = """
-            {
-                "title": "Task to Find",
-                "description": "Description"
-            }
-            """;
-
-        String response = mockMvc.perform(post("/api/v1/tasks")
-                .header("Authorization", "Bearer " + accessToken)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(createBody))
-                .andExpect(status().isCreated())
-                .andReturn()
-                .getResponse()
-                .getContentAsString();
-
-        String taskId = objectMapper.readTree(response).get("id").asText();
-
-        // Get task by ID
-        mockMvc.perform(get("/api/v1/tasks/" + taskId)
-                .header("Authorization", "Bearer " + accessToken))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(taskId))
-                .andExpect(jsonPath("$.title").value("Task to Find"))
-                .andExpect(jsonPath("$.description").value("Description"));
-    }
-
-    @Test
-    void shouldReturnNotFoundWhenTaskNotFound() throws Exception {
-        String nonExistentId = "00000000-0000-0000-0000-000000000000";
-        
-        mockMvc.perform(get("/api/v1/tasks/" + nonExistentId)
-                .header("Authorization", "Bearer " + accessToken))
-                .andExpect(status().isNotFound());
-    }
-
-    @Test
-    void shouldFindAllTasksWithoutPagination() throws Exception {
-        // Create tasks first
-        String taskBody1 = """
-            {
-                "title": "Task 1",
-                "description": "Description 1"
-            }
-            """;
-
-        String taskBody2 = """
-            {
-                "title": "Task 2",
-                "description": "Description 2"
-            }
-            """;
-
-        mockMvc.perform(post("/api/v1/tasks")
-                .header("Authorization", "Bearer " + accessToken)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(taskBody1))
-                .andExpect(status().isCreated());
-
-        mockMvc.perform(post("/api/v1/tasks")
-                .header("Authorization", "Bearer " + accessToken)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(taskBody2))
-                .andExpect(status().isCreated());
-
-        // Get all tasks without pagination
-        mockMvc.perform(get("/api/v1/tasks/all")
-                .header("Authorization", "Bearer " + accessToken))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isArray())
-                .andExpect(jsonPath("$[0].title").exists())
-                .andExpect(jsonPath("$[1].title").exists());
-    }
-
-    @Test
-    void shouldFindTasksWithPagination() throws Exception {
-        // Create multiple tasks
+    void shouldFindTaskListsWithPagination() throws Exception {
+        // Create multiple task lists
         for (int i = 1; i <= 5; i++) {
-            String taskBody = String.format("""
+            String taskListBody = String.format("""
                 {
-                    "title": "Task %d",
-                    "description": "Description %d"
+                    "name": "List %d"
                 }
-                """, i, i);
+                """, i);
 
-            mockMvc.perform(post("/api/v1/tasks")
+            mockMvc.perform(post("/api/v1/task-lists")
                     .header("Authorization", "Bearer " + accessToken)
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(taskBody))
+                    .content(taskListBody))
                     .andExpect(status().isCreated());
         }
 
-        // Get tasks with pagination
-        mockMvc.perform(get("/api/v1/tasks")
+        // Get task lists with pagination
+        mockMvc.perform(get("/api/v1/task-lists")
                 .param("page", "0")
                 .param("size", "2")
                 .header("Authorization", "Bearer " + accessToken))
@@ -325,6 +320,21 @@ class TaskControllerIntegrationTest {
                 .andExpect(jsonPath("$.page").value(0))
                 .andExpect(jsonPath("$.size").value(2))
                 .andExpect(jsonPath("$.totalElements").value(5));
+    }
+
+    @Test
+    void shouldReturnBadRequestWhenValidationFails() throws Exception {
+        String invalidBody = """
+            {
+                "name": ""
+            }
+            """;
+
+        mockMvc.perform(post("/api/v1/task-lists")
+                .header("Authorization", "Bearer " + accessToken)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(invalidBody))
+                .andExpect(status().isBadRequest());
     }
 }
 

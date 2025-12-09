@@ -12,6 +12,7 @@
 */
 package br.com.jtech.tasklist.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -21,6 +22,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -37,6 +40,9 @@ class AuthControllerIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @Test
     void shouldRegisterUserSuccessfully() throws Exception {
@@ -139,6 +145,59 @@ class AuthControllerIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(loginBody))
                 .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void shouldGetCurrentUserSuccessfully() throws Exception {
+        // First register and login
+        String registerBody = """
+            {
+                "name": "Current User",
+                "email": "current@example.com",
+                "password": "password123"
+            }
+            """;
+
+        mockMvc.perform(post("/api/v1/auth/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(registerBody))
+                .andExpect(status().isCreated());
+
+        String loginBody = """
+            {
+                "email": "current@example.com",
+                "password": "password123"
+            }
+            """;
+
+        String response = mockMvc.perform(post("/api/v1/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(loginBody))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        String accessToken = objectMapper.readTree(response).get("accessToken").asText();
+
+        // Get current user
+        mockMvc.perform(get("/api/v1/auth/me")
+                .header("Authorization", "Bearer " + accessToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").exists())
+                .andExpect(jsonPath("$.name").value("Current User"))
+                .andExpect(jsonPath("$.email").value("current@example.com"));
+    }
+
+    @Test
+    void shouldReturnUnauthorizedWhenGettingCurrentUserWithoutToken() throws Exception {
+        int status = mockMvc.perform(get("/api/v1/auth/me"))
+                .andReturn()
+                .getResponse()
+                .getStatus();
+        
+        // Spring Security pode retornar 401 (Unauthorized) ou 403 (Forbidden) quando não há token
+        assertTrue(status == 401 || status == 403, "Status deve ser 401 ou 403");
     }
 }
 
