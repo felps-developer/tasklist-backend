@@ -38,5 +38,7 @@ public class TaskRequest {
     private String description;
 
     private Boolean completed;
+
+    private String taskListId;
 }
 

@@ -1,5 +1,5 @@
 /*
-*  @(#)TaskResponse.java
+*  @(#)TaskListResponse.java
 *
 *  Copyright (c) J-Tech Solucoes em Informatica.
 *  All Rights Reserved.
@@ -20,7 +20,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 /**
-* class TaskResponse 
+* class TaskListResponse 
 * 
 * @author jtech
 */
@@ -28,13 +28,10 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class TaskResponse {
+public class TaskListResponse {
 
     private String id;
-    private String title;
-    private String description;
-    private Boolean completed;
-    private String taskListId;
+    private String name;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

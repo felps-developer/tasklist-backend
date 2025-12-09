@@ -1,5 +1,5 @@
 /*
-*  @(#)TaskResponse.java
+*  @(#)TaskListRequest.java
 *
 *  Copyright (c) J-Tech Solucoes em Informatica.
 *  All Rights Reserved.
@@ -12,15 +12,15 @@
 */
 package br.com.jtech.tasklist.dto;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
-
 /**
-* class TaskResponse 
+* class TaskListRequest 
 * 
 * @author jtech
 */
@@ -28,14 +28,10 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class TaskResponse {
+public class TaskListRequest {
 
-    private String id;
-    private String title;
-    private String description;
-    private Boolean completed;
-    private String taskListId;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    @NotBlank(message = "Nome da lista é obrigatório")
+    @Size(max = 200, message = "Nome da lista deve ter no máximo 200 caracteres")
+    private String name;
 }
 

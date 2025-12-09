@@ -46,7 +46,8 @@ public class TaskController {
         TaskEntity created = taskService.create(
             request.getTitle(), 
             request.getDescription(), 
-            request.getCompleted(), 
+            request.getCompleted(),
+            request.getTaskListId(),
             userEmail
         );
         
@@ -54,9 +55,18 @@ public class TaskController {
     }
 
     @GetMapping
-    public ResponseEntity<List<TaskResponse>> findAll(Authentication authentication) {
+    public ResponseEntity<List<TaskResponse>> findAll(
+            @RequestParam(required = false) String taskListId,
+            Authentication authentication) {
         String userEmail = authentication.getName();
-        List<TaskEntity> tasks = taskService.findAllByUserEmail(userEmail);
+        List<TaskEntity> tasks;
+        
+        if (taskListId != null && !taskListId.isEmpty()) {
+            tasks = taskService.findAllByTaskListIdAndUserEmail(java.util.UUID.fromString(taskListId), userEmail);
+        } else {
+            tasks = taskService.findAllByUserEmail(userEmail);
+        }
+        
         List<TaskResponse> responses = tasks.stream()
                 .map(this::toResponse)
                 .toList();
@@ -83,6 +93,7 @@ public class TaskController {
             request.getTitle(),
             request.getDescription(),
             request.getCompleted(),
+            request.getTaskListId(),
             userEmail
         );
         
@@ -102,6 +113,7 @@ public class TaskController {
                 .title(task.getTitle())
                 .description(task.getDescription())
                 .completed(task.getCompleted())
+                .taskListId(task.getTaskList() != null ? task.getTaskList().getId().toString() : null)
                 .createdAt(task.getCreatedAt())
                 .updatedAt(task.getUpdatedAt())
                 .build();

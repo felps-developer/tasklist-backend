@@ -1,5 +1,5 @@
 /*
-*  @(#)TaskEntity.java
+*  @(#)TaskListEntity.java
 *
 *  Copyright (c) J-Tech Solucoes em Informatica.
 *  All Rights Reserved.
@@ -17,10 +17,12 @@ import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 /**
-* class TaskEntity 
+* class TaskListEntity 
 * 
 * @author jtech
 */
@@ -30,8 +32,8 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "tasks")
-public class TaskEntity {
+@Table(name = "task_lists")
+public class TaskListEntity {
 
     @Id
     @GeneratedValue(generator = "uuid2")
@@ -39,22 +41,15 @@ public class TaskEntity {
     private UUID id;
 
     @Column(nullable = false)
-    private String title;
-
-    @Column(length = 1000)
-    private String description;
-
-    @Column(nullable = false)
-    @Builder.Default
-    private Boolean completed = false;
+    private String name;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private UserEntity user;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "task_list_id")
-    private TaskListEntity taskList;
+    @OneToMany(mappedBy = "taskList", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<TaskEntity> tasks = new ArrayList<>();
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;

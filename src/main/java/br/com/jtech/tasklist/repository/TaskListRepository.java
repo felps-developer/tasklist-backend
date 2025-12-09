@@ -1,5 +1,5 @@
 /*
-*  @(#)TaskRepository.java
+*  @(#)TaskListRepository.java
 *
 *  Copyright (c) J-Tech Solucoes em Informatica.
 *  All Rights Reserved.
@@ -12,7 +12,7 @@
 */
 package br.com.jtech.tasklist.repository;
 
-import br.com.jtech.tasklist.entity.TaskEntity;
+import br.com.jtech.tasklist.entity.TaskListEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -21,18 +21,16 @@ import java.util.Optional;
 import java.util.UUID;
 
 /**
-* class TaskRepository 
+* class TaskListRepository 
 * 
 * @author jtech
 */
 @Repository
-public interface TaskRepository extends JpaRepository<TaskEntity, UUID> {
+public interface TaskListRepository extends JpaRepository<TaskListEntity, UUID> {
     
-    List<TaskEntity> findByUser_Id(UUID userId);
+    List<TaskListEntity> findByUser_Id(UUID userId);
     
-    List<TaskEntity> findByTaskList_IdAndUser_Id(UUID taskListId, UUID userId);
-    
-    Optional<TaskEntity> findByIdAndUser_Id(UUID id, UUID userId);
+    Optional<TaskListEntity> findByIdAndUser_Id(UUID id, UUID userId);
     
     boolean existsByIdAndUser_Id(UUID id, UUID userId);
 }
