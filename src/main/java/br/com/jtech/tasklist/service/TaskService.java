@@ -20,6 +20,9 @@ import br.com.jtech.tasklist.repository.TaskListRepository;
 import br.com.jtech.tasklist.repository.UserRepository;
 import br.com.jtech.tasklist.config.infra.exceptions.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -46,7 +49,7 @@ public class TaskService {
                 .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado"));
 
         TaskListEntity taskList = null;
-        if (taskListId != null && !taskListId.isEmpty()) {
+        if (taskListId != null && !taskListId.isEmpty() && !taskListId.equals("undefined") && isValidUUID(taskListId)) {
             taskList = taskListRepository.findByIdAndUser_Id(UUID.fromString(taskListId), user.getId())
                     .orElseThrow(() -> new ResourceNotFoundException("Lista não encontrada ou você não tem permissão para acessá-la"));
         }
@@ -69,11 +72,59 @@ public class TaskService {
         return taskRepository.findByUser_Id(user.getId());
     }
 
+    public List<TaskEntity> findAllByUserEmailAndTitle(String userEmail, String title) {
+        UserEntity user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado"));
+
+        if (title == null || title.trim().isEmpty() || title.equals("")) {
+            return taskRepository.findByUser_Id(user.getId());
+        }
+
+        return taskRepository.findByUser_IdAndTitleContainingIgnoreCase(user.getId(), title.trim());
+    }
+
+    public Page<TaskEntity> findAllByUserEmailPaginated(String userEmail, int page, int size, String title) {
+        UserEntity user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado"));
+
+        Pageable pageable = PageRequest.of(page, size);
+
+        if (title == null || title.trim().isEmpty() || title.equals("")) {
+            return taskRepository.findByUser_Id(user.getId(), pageable);
+        }
+
+        return taskRepository.findByUser_IdAndTitleContainingIgnoreCase(user.getId(), title.trim(), pageable);
+    }
+
     public List<TaskEntity> findAllByTaskListIdAndUserEmail(UUID taskListId, String userEmail) {
         UserEntity user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado"));
 
         return taskRepository.findByTaskList_IdAndUser_Id(taskListId, user.getId());
+    }
+
+    public Page<TaskEntity> findAllByTaskListIdAndUserEmailPaginated(UUID taskListId, String userEmail, int page, int size, String title) {
+        UserEntity user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado"));
+
+        Pageable pageable = PageRequest.of(page, size);
+
+        if (title == null || title.trim().isEmpty() || title.equals("")) {
+            return taskRepository.findByTaskList_IdAndUser_Id(taskListId, user.getId(), pageable);
+        }
+
+        return taskRepository.findByTaskList_IdAndUser_IdAndTitleContainingIgnoreCase(taskListId, user.getId(), title.trim(), pageable);
+    }
+
+    public List<TaskEntity> findAllByTaskListIdAndUserEmailAndTitle(UUID taskListId, String userEmail, String title) {
+        UserEntity user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado"));
+
+        if (title == null || title.trim().isEmpty() || title.equals("")) {
+            return taskRepository.findByTaskList_IdAndUser_Id(taskListId, user.getId());
+        }
+
+        return taskRepository.findByTaskList_IdAndUser_IdAndTitleContainingIgnoreCase(taskListId, user.getId(), title.trim());
     }
 
     public Optional<TaskEntity> findByIdAndUserEmail(UUID id, String userEmail) {
@@ -97,7 +148,7 @@ public class TaskService {
         }
 
         // Atualizar lista da tarefa
-        if (taskListId != null && !taskListId.isEmpty()) {
+        if (taskListId != null && !taskListId.isEmpty() && !taskListId.equals("undefined") && isValidUUID(taskListId)) {
             TaskListEntity taskList = taskListRepository.findByIdAndUser_Id(UUID.fromString(taskListId), user.getId())
                     .orElseThrow(() -> new ResourceNotFoundException("Lista não encontrada ou você não tem permissão para acessá-la"));
             existingTask.setTaskList(taskList);
@@ -116,6 +167,18 @@ public class TaskService {
                 .orElseThrow(() -> new ResourceNotFoundException("Tarefa não encontrada ou você não tem permissão para acessá-la"));
 
         taskRepository.deleteById(task.getId());
+    }
+    
+    private boolean isValidUUID(String str) {
+        if (str == null || str.isEmpty()) {
+            return false;
+        }
+        try {
+            UUID.fromString(str);
+            return true;
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
     }
 }
 

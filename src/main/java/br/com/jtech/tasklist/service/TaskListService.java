@@ -18,6 +18,9 @@ import br.com.jtech.tasklist.repository.TaskListRepository;
 import br.com.jtech.tasklist.repository.UserRepository;
 import br.com.jtech.tasklist.config.infra.exceptions.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -55,6 +58,30 @@ public class TaskListService {
                 .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado"));
 
         return taskListRepository.findByUser_Id(user.getId());
+    }
+
+    public List<TaskListEntity> findAllByUserEmailAndName(String userEmail, String name) {
+        UserEntity user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado"));
+
+        if (name == null || name.trim().isEmpty() || name.equals("")) {
+            return taskListRepository.findByUser_Id(user.getId());
+        }
+
+        return taskListRepository.findByUser_IdAndNameContainingIgnoreCase(user.getId(), name.trim());
+    }
+
+    public Page<TaskListEntity> findAllByUserEmailPaginated(String userEmail, int page, int size, String name) {
+        UserEntity user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado"));
+
+        Pageable pageable = PageRequest.of(page, size);
+
+        if (name == null || name.trim().isEmpty() || name.equals("")) {
+            return taskListRepository.findByUser_Id(user.getId(), pageable);
+        }
+
+        return taskListRepository.findByUser_IdAndNameContainingIgnoreCase(user.getId(), name.trim(), pageable);
     }
 
     public Optional<TaskListEntity> findByIdAndUserEmail(UUID id, String userEmail) {
