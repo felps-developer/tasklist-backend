@@ -289,3 +289,59 @@
 2025-12-09T12:03:32.667-03:00  INFO 28184 --- [tasklist] [SpringApplicationShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
 2025-12-09T12:03:32.945-03:00  INFO 28184 --- [tasklist] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
 2025-12-09T12:03:32.950-03:00  INFO 28184 --- [tasklist] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2025-12-09T12:24:26.281-03:00  INFO 28816 --- [tasklist] [main] br.com.jtech.tasklist.StartTasklist      : Starting StartTasklist using Java 21.0.9 with PID 28816 (D:\Users\Felipe Moreira\Documents\Projeto-FazPay\tasklist-backend\build\classes\java\main started by User in D:\Users\Felipe Moreira\Documents\Projeto-FazPay\tasklist-backend)
+2025-12-09T12:24:26.282-03:00 DEBUG 28816 --- [tasklist] [main] br.com.jtech.tasklist.StartTasklist      : Running with Spring Boot v3.3.5, Spring v6.1.14
+2025-12-09T12:24:26.283-03:00  INFO 28816 --- [tasklist] [main] br.com.jtech.tasklist.StartTasklist      : The following 1 profile is active: "dev"
+2025-12-09T12:24:27.336-03:00  INFO 28816 --- [tasklist] [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-12-09T12:24:27.403-03:00  INFO 28816 --- [tasklist] [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 60 ms. Found 3 JPA repository interfaces.
+2025-12-09T12:24:28.191-03:00  INFO 28816 --- [tasklist] [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2025-12-09T12:24:28.208-03:00  INFO 28816 --- [tasklist] [main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2025-12-09T12:24:28.208-03:00  INFO 28816 --- [tasklist] [main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.31]
+2025-12-09T12:24:28.293-03:00  INFO 28816 --- [tasklist] [main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2025-12-09T12:24:28.293-03:00  INFO 28816 --- [tasklist] [main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1966 ms
+2025-12-09T12:24:28.499-03:00 DEBUG 28816 --- [tasklist] [main] b.c.j.t.c.i.s.JwtAuthenticationFilter    : Filter 'jwtAuthenticationFilter' configured for use
+2025-12-09T12:24:28.704-03:00  INFO 28816 --- [tasklist] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2025-12-09T12:24:28.844-03:00  INFO 28816 --- [tasklist] [main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@4449a60b
+2025-12-09T12:24:28.846-03:00  INFO 28816 --- [tasklist] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2025-12-09T12:24:28.874-03:00  INFO 28816 --- [tasklist] [main] org.flywaydb.core.FlywayExecutor         : Database: jdbc:postgresql://localhost:5433/tasklist_db (PostgreSQL 16.11)
+2025-12-09T12:24:28.912-03:00  INFO 28816 --- [tasklist] [main] o.f.c.i.s.JdbcTableSchemaHistory         : Schema history table "public"."flyway_schema_history" does not exist yet
+2025-12-09T12:24:28.916-03:00  INFO 28816 --- [tasklist] [main] o.f.core.internal.command.DbValidate     : Successfully validated 4 migrations (execution time 00:00.020s)
+2025-12-09T12:24:28.936-03:00  INFO 28816 --- [tasklist] [main] o.f.c.i.s.JdbcTableSchemaHistory         : Creating Schema History table "public"."flyway_schema_history" ...
+2025-12-09T12:24:28.993-03:00  INFO 28816 --- [tasklist] [main] o.f.core.internal.command.DbMigrate      : Current version of schema "public": << Empty Schema >>
+2025-12-09T12:24:29.003-03:00  INFO 28816 --- [tasklist] [main] o.f.core.internal.command.DbMigrate      : Migrating schema "public" to version "1 - Create users table"
+2025-12-09T12:24:29.066-03:00  INFO 28816 --- [tasklist] [main] o.f.core.internal.command.DbMigrate      : Migrating schema "public" to version "2 - Create tasks table"
+2025-12-09T12:24:29.123-03:00  INFO 28816 --- [tasklist] [main] o.f.core.internal.command.DbMigrate      : Migrating schema "public" to version "3 - Create task lists table"
+2025-12-09T12:24:29.172-03:00  INFO 28816 --- [tasklist] [main] o.f.core.internal.command.DbMigrate      : Migrating schema "public" to version "4 - Add active column to tasks and task lists"
+2025-12-09T12:24:29.205-03:00  INFO 28816 --- [tasklist] [main] o.f.core.internal.command.DbMigrate      : Successfully applied 4 migrations to schema "public", now at version v4 (execution time 00:00.119s)
+2025-12-09T12:24:29.312-03:00  INFO 28816 --- [tasklist] [main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-12-09T12:24:29.378-03:00  INFO 28816 --- [tasklist] [main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.5.3.Final
+2025-12-09T12:24:29.411-03:00  INFO 28816 --- [tasklist] [main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2025-12-09T12:24:29.707-03:00  INFO 28816 --- [tasklist] [main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-12-09T12:24:29.760-03:00  WARN 28816 --- [tasklist] [main] org.hibernate.orm.deprecation            : HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2025-12-09T12:24:30.731-03:00  INFO 28816 --- [tasklist] [main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-12-09T12:24:30.783-03:00  INFO 28816 --- [tasklist] [main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-12-09T12:24:31.163-03:00  INFO 28816 --- [tasklist] [main] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2025-12-09T12:24:31.802-03:00  WARN 28816 --- [tasklist] [main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-12-09T12:24:31.832-03:00  INFO 28816 --- [tasklist] [main] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name userDetailsServiceImpl
+2025-12-09T12:24:32.672-03:00  INFO 28816 --- [tasklist] [main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 16 endpoints beneath base path '/actuator'
+2025-12-09T12:24:33.197-03:00  WARN 28816 --- [tasklist] [main] ConfigServletWebServerApplicationContext : Exception encountered during context initialization - cancelling refresh attempt: org.springframework.context.ApplicationContextException: Failed to start bean 'webServerStartStop'
+2025-12-09T12:24:33.200-03:00  INFO 28816 --- [tasklist] [main] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-12-09T12:24:33.202-03:00  INFO 28816 --- [tasklist] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2025-12-09T12:24:33.206-03:00  INFO 28816 --- [tasklist] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2025-12-09T12:24:33.222-03:00  INFO 28816 --- [tasklist] [main] .s.b.a.l.ConditionEvaluationReportLogger : 
+
+Error starting ApplicationContext. To display the condition evaluation report re-run your application with 'debug' enabled.
+2025-12-09T12:24:33.240-03:00 ERROR 28816 --- [tasklist] [main] o.s.b.d.LoggingFailureAnalysisReporter   : 
+
+***************************
+APPLICATION FAILED TO START
+***************************
+
+Description:
+
+Web server failed to start. Port 8080 was already in use.
+
+Action:
+
+Identify and stop the process that's listening on port 8080 or configure this application to listen on another port.
+
