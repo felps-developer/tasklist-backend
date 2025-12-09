@@ -60,6 +60,7 @@ class TaskServiceTest {
                 .title("Test Task")
                 .description("Test Description")
                 .completed(false)
+                .active(true)
                 .user(user)
                 .build();
     }
@@ -76,14 +77,18 @@ class TaskServiceTest {
                 .build();
 
         when(userRepository.findByEmail(userEmail)).thenReturn(Optional.of(user));
-        when(taskRepository.save(any(TaskEntity.class))).thenReturn(task);
+        when(taskRepository.save(any(TaskEntity.class))).thenAnswer(invocation -> {
+            TaskEntity savedTask = invocation.getArgument(0);
+            savedTask.setId(task.getId());
+            return savedTask;
+        });
 
         // When
         TaskResponse result = taskService.save(request, userEmail);
 
         // Then
         assertThat(result).isNotNull();
-        assertThat(result.getTitle()).isEqualTo("Test Task");
+        assertThat(result.getTitle()).isEqualTo("New Task");
         verify(userRepository).findByEmail(userEmail);
         verify(taskRepository).save(any(TaskEntity.class));
     }
@@ -103,14 +108,18 @@ class TaskServiceTest {
         when(userRepository.findByEmail(userEmail)).thenReturn(Optional.of(user));
         when(taskRepository.findByIdAndUser_Id(task.getId(), user.getId()))
                 .thenReturn(Optional.of(task));
-        when(taskRepository.save(any(TaskEntity.class))).thenReturn(task);
+        when(taskRepository.save(any(TaskEntity.class))).thenAnswer(invocation -> {
+            TaskEntity savedTask = invocation.getArgument(0);
+            return savedTask;
+        });
 
         // When
         TaskResponse result = taskService.update(task.getId().toString(), request, userEmail);
 
         // Then
         assertThat(result).isNotNull();
-        verify(userRepository).findByEmail(userEmail);
+        assertThat(result.getTitle()).isEqualTo("Updated Task");
+        verify(userRepository, times(2)).findByEmail(userEmail);
         verify(taskRepository).findByIdAndUser_Id(task.getId(), user.getId());
         verify(taskRepository).save(any(TaskEntity.class));
     }
@@ -141,7 +150,7 @@ class TaskServiceTest {
     }
 
     @Test
-    void shouldDeleteTaskSuccessfully() {
+    void shouldSoftDeleteTaskSuccessfully() {
         // Given
         String userEmail = "test@example.com";
         UUID taskId = task.getId();
@@ -149,19 +158,23 @@ class TaskServiceTest {
         when(userRepository.findByEmail(userEmail)).thenReturn(Optional.of(user));
         when(taskRepository.findByIdAndUser_Id(taskId, user.getId()))
                 .thenReturn(Optional.of(task));
-        doNothing().when(taskRepository).deleteById(taskId);
+        when(taskRepository.save(any(TaskEntity.class))).thenAnswer(invocation -> {
+            TaskEntity savedTask = invocation.getArgument(0);
+            assertThat(savedTask.getActive()).isFalse();
+            return savedTask;
+        });
 
         // When
-        taskService.delete(taskId.toString(), userEmail);
+        taskService.softDelete(taskId.toString(), userEmail);
 
         // Then
         verify(userRepository).findByEmail(userEmail);
         verify(taskRepository).findByIdAndUser_Id(taskId, user.getId());
-        verify(taskRepository).deleteById(taskId);
+        verify(taskRepository).save(any(TaskEntity.class));
     }
 
     @Test
-    void shouldThrowExceptionWhenTaskNotFoundForDelete() {
+    void shouldThrowExceptionWhenTaskNotFoundForSoftDelete() {
         // Given
         String userEmail = "test@example.com";
         UUID taskId = task.getId();
@@ -171,13 +184,13 @@ class TaskServiceTest {
                 .thenReturn(Optional.empty());
 
         // When/Then
-        assertThatThrownBy(() -> taskService.delete(taskId.toString(), userEmail))
+        assertThatThrownBy(() -> taskService.softDelete(taskId.toString(), userEmail))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessage("Tarefa não encontrada ou você não tem permissão para acessá-la");
 
         verify(userRepository).findByEmail(userEmail);
         verify(taskRepository).findByIdAndUser_Id(taskId, user.getId());
-        verify(taskRepository, never()).deleteById(any(UUID.class));
+        verify(taskRepository, never()).save(any(TaskEntity.class));
     }
 }
 

@@ -31,11 +31,11 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional(propagation = Propagation.SUPPORTS)
     public UserEntity register(RegisterRequest request) {
-        try {
-            if (repository.existsByEmail(request.getEmail())) {
-                throw new IllegalArgumentException("Email já está em uso");
-            }
+        if (repository.existsByEmail(request.getEmail())) {
+            throw new IllegalArgumentException("Email já está em uso");
+        }
 
+        try {
             UserEntity user = convert(request);
             repository.save(user);
             return user;

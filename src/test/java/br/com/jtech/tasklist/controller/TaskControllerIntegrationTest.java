@@ -143,7 +143,7 @@ class TaskControllerIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").isArray())
                 .andExpect(jsonPath("$.content[0].title").value("Task 1"))
-                .andExpect(jsonPath("$.page").exists())
+                .andExpect(jsonPath("$.number").exists())
                 .andExpect(jsonPath("$.size").exists())
                 .andExpect(jsonPath("$.totalElements").exists());
     }
@@ -208,8 +208,8 @@ class TaskControllerIntegrationTest {
 
         String taskId = objectMapper.readTree(response).get("id").asText();
 
-        // Delete the task
-        mockMvc.perform(delete("/api/v1/tasks/" + taskId)
+        // Delete the task (soft delete)
+        mockMvc.perform(delete("/api/v1/tasks/" + taskId + "/soft")
                 .header("Authorization", "Bearer " + accessToken))
                 .andExpect(status().isNoContent());
 
@@ -322,7 +322,7 @@ class TaskControllerIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").isArray())
                 .andExpect(jsonPath("$.content.length()").value(2))
-                .andExpect(jsonPath("$.page").value(0))
+                .andExpect(jsonPath("$.number").value(0))
                 .andExpect(jsonPath("$.size").value(2))
                 .andExpect(jsonPath("$.totalElements").value(5));
     }

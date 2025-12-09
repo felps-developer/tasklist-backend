@@ -67,14 +67,19 @@ class AuthServiceTest {
 
         when(userRepository.existsByEmail(request.getEmail())).thenReturn(false);
         when(passwordEncoder.encode(request.getPassword())).thenReturn("encodedPassword");
-        when(userRepository.save(any(UserEntity.class))).thenReturn(user);
+        when(userRepository.save(any(UserEntity.class))).thenAnswer(invocation -> {
+            UserEntity savedUser = invocation.getArgument(0);
+            savedUser.setId(user.getId());
+            return savedUser;
+        });
 
         // When
         UserEntity result = authService.register(request);
 
         // Then
         assertThat(result).isNotNull();
-        assertThat(result.getEmail()).isEqualTo("test@example.com");
+        assertThat(result.getEmail()).isEqualTo("new@example.com");
+        assertThat(result.getName()).isEqualTo("New User");
         verify(userRepository).existsByEmail(request.getEmail());
         verify(passwordEncoder).encode(request.getPassword());
         verify(userRepository).save(any(UserEntity.class));
