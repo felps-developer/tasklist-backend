@@ -292,6 +292,53 @@ spring:
     password: postgres
 ```
 
+4. **Criar conexão no DBeaver ou similar**:
+
+Para visualizar e gerenciar o banco de dados através de uma ferramenta gráfica como DBeaver, DataGrip, pgAdmin ou similar:
+
+**DBeaver:**
+
+1. Abra o DBeaver
+2. Clique em "Nova Conexão" (ícone de plug) ou `Database` → `New Database Connection`
+3. Selecione **PostgreSQL**
+4. Configure a conexão:
+   - **Host**: `localhost`
+   - **Port**: `5433` (ou `5432` se estiver usando PostgreSQL local sem Docker)
+   - **Database**: `tasklist_db`
+   - **Username**: `postgres`
+   - **Password**: `postgres`
+5. Clique em "Test Connection" para verificar
+6. Clique em "Finish" para salvar a conexão
+
+**DataGrip (JetBrains):**
+
+1. Abra o DataGrip
+2. Clique no ícone `+` → `Data Source` → `PostgreSQL`
+3. Configure:
+   - **Host**: `localhost`
+   - **Port**: `5433` (ou `5432` se estiver usando PostgreSQL local sem Docker)
+   - **Database**: `tasklist_db`
+   - **User**: `postgres`
+   - **Password**: `postgres`
+4. Clique em "Test Connection" e baixe o driver se necessário
+5. Clique em "OK" para salvar
+
+**pgAdmin:**
+
+1. Abra o pgAdmin
+2. Clique com botão direito em "Servers" → `Register` → `Server`
+3. Na aba "General":
+   - **Name**: `Tasklist Local` (ou qualquer nome)
+4. Na aba "Connection":
+   - **Host name/address**: `localhost`
+   - **Port**: `5433` (ou `5432` se estiver usando PostgreSQL local sem Docker)
+   - **Maintenance database**: `tasklist_db`
+   - **Username**: `postgres`
+   - **Password**: `postgres`
+5. Clique em "Save" para salvar a conexão
+
+**Nota**: Se estiver usando Docker Compose (Opção 1), a porta será `5433`. Se estiver usando PostgreSQL local (Opção 2), a porta padrão geralmente é `5432`.
+
 ### Migrations do Flyway
 
 O projeto utiliza **Flyway** para controle de versão do banco de dados. As migrations estão localizadas em `src/main/resources/db/migration/`:
